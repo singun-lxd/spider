@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 #程序爬取完当天数据的一个休眠时间
 SLEEP_TIME=60*60*12

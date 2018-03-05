@@ -1,3 +1,7 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import codecs
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -43,7 +47,7 @@ def write_to_file(content):
     '''
     :param content:要写入文件的内容
     '''
-    with open("result.txt",'a',encoding="utf-8") as f:
+    with codecs.open("result.txt",'a',encoding="utf-8") as f:
         f.write(json.dumps(content,ensure_ascii=False)+"\n")
 
 
@@ -51,22 +55,25 @@ def get_page_nums():
     '''
     :return:返回的是需要爬取的总页数
     '''
-    base_url = "http://www.hshfy.sh.cn/shfy/gweb/ktgg_search_content.jsp?"
+    base_url = "http://www.hshfy.sh.cn/shfy/gweb2017/ktgg_search_content.jsp?"
     date_time = datetime.date.fromtimestamp(time.time())
     data = {
-        "pktrqks": date_time,
+        "ktrqks": date_time,
         "ktrqjs": date_time,
     }
     while True:
         html = get_html(base_url,data)
         soup = BeautifulSoup(html, 'lxml')
-        if soup.body.text.strip() == "系统繁忙":
+        if soup.body.text.strip() == "系统繁忙".decode("utf-8"):
             print("系统繁忙，登录太频繁，ip被封锁")
             time.sleep(ERROR_SLEEP_TIME)
             continue
         else:
             break
     res = soup.find("div",attrs={"class":"meneame"})
+    if not res:
+        print("解析异常")
+        return
 
     page_nums = res.find('strong').text
     #这里获得page_nums是一个爬取的总条数，每页是15条数据，通过下面方法获取总页数
@@ -84,14 +91,14 @@ def main():
     这里是一个死循环爬取数据
     '''
     page_nums = get_page_nums()
-    if not True:
+    if not page_nums:
         return
-    base_url = "http://www.hshfy.sh.cn/shfy/gweb/ktgg_search_content.jsp?"
+    base_url = "http://www.hshfy.sh.cn/shfy/gweb2017/ktgg_search_content.jsp?"
     while True:
         date_time = datetime.date.fromtimestamp(time.time())
         page_num = 1
         data = {
-            "pktrqks": date_time,
+            "ktrqks": date_time,
             "ktrqjs": date_time,
             "pagesnum":page_num
         }
@@ -100,7 +107,7 @@ def main():
             while True:
                 html = get_html(base_url, data)
                 soup = BeautifulSoup(html, 'lxml')
-                if soup.body.text.strip() == "系统繁忙":
+                if soup.body.text.strip() == "系统繁忙".decode("utf-8"):
                     print("系统繁忙，登录太频繁，ip被封锁")
                     time.sleep(ERROR_SLEEP_TIME)
                     continue
