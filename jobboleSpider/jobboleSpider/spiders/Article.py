@@ -6,7 +6,8 @@ from jobboleSpider.items import JoBoleArticleItem
 from jobboleSpider.utils.common import get_md5
 import datetime
 from scrapy.loader import ItemLoader
-from urllib import parse
+#from urllib import parse
+import urlparse
 
 class ArticleSpider(scrapy.Spider):
     name = "Article"
@@ -28,7 +29,7 @@ class ArticleSpider(scrapy.Spider):
             post_url = post_node.css("::attr(href)").extract_first("")
             #这里通过meta参数将图片的url传递进来，这里用parse.urljoin的好处是如果有域名我前面的response.url不生效
             # 如果没有就会把response.url和post_url做拼接
-            yield Request(url=parse.urljoin(response.url,post_url),meta={"front_image_url":parse.urljoin(response.url,image_url)},callback=self.parse_detail)
+            yield Request(url=urlparse.urljoin(response.url,post_url),meta={"front_image_url":urlparse.urljoin(response.url,image_url)},callback=self.parse_detail)
 
         #提取下一页并交给scrapy下载
         next_url = response.css(".next.page-numbers::attr(href)").extract_first("")
@@ -52,7 +53,7 @@ class ArticleSpider(scrapy.Spider):
         create_date = response.xpath('//p[@class="entry-meta-hide-on-mobile"]/text()').extract()[0].strip().split()[0]
 
         tag_list = response.xpath('//p[@class="entry-meta-hide-on-mobile"]/a/text()').extract()
-        tag_list = [element for element in tag_list if not element.strip().endswith("评论")]
+        tag_list = [element for element in tag_list if not element.strip().endswith("评论".decode('utf-8'))]
         tag =",".join(tag_list)
         praise_nums = response.xpath('//span[contains(@class,"vote-post-up")]/h10/text()').extract()
         if len(praise_nums) == 0:
